@@ -1,3 +1,6 @@
+-- bf_free.lua  —  built by olivia  —  https://discord.gg/ojailbreaks
+-- loader free: hwid -> linkvertise -> key derivada -> bf_main_paid
+
 local SALT         = "zkz-ollie-fridge-6767-banana-cheia-$Lk9m!PxVn@2026"
 local SHORT_URL    = "https://link-hub.net/8789843/FRSCqUrAq5LC"
 local KEY_PAGE     = "https://zekkz121.github.io/getkey/"
@@ -34,10 +37,16 @@ local function fnv32(s)
     return ("%08x"):format(h)
 end
 
+local function device_code(id)
+    -- hash o hwid pra 8 chars hex — faceis de ver/anotar/digitar
+    return fnv32(id.."::DEVICE::"..SALT)
+end
+
 local function derive_key(id, yyyymmdd)
-    return fnv32(id.."::"..yyyymmdd.."::"..SALT.."::1")
-        .. fnv32(id.."::"..yyyymmdd.."::"..SALT.."::2")
-        .. fnv32(id.."::"..yyyymmdd.."::"..SALT.."::3")
+    local code = device_code(id)
+    return fnv32(code.."::"..yyyymmdd.."::"..SALT.."::1")
+        .. fnv32(code.."::"..yyyymmdd.."::"..SALT.."::2")
+        .. fnv32(code.."::"..yyyymmdd.."::"..SALT.."::3")
 end
 
 local function today()
@@ -78,14 +87,11 @@ end
 
 local function deny(id, reason)
     wipe_caches()
-    -- clipboard formatado: user cola em qualquer lugar (notes/whatsapp/etc) e tem as duas coisas
-    local clip_payload = ("1) LINK:\n%s\n\n2) HWID (cola na pagina):\n%s"):format(SHORT_URL, id)
-    setclip(clip_payload)
+    local code = device_code(id)
+    setclip(SHORT_URL)  -- so o link no clipboard
     warn("[bf_free] "..reason)
-    warn("[bf_free] LINK + HWID copiados pro clipboard")
-    warn("[bf_free] cola no notepad/whatsapp/bloco de notas pra ver os dois:")
-    warn("    LINK:  "..SHORT_URL)
-    warn("    HWID:  "..id)
+    warn("[bf_free] LINK copiado pro Ctrl+V")
+    warn("[bf_free] SEU CODIGO: "..code.."  (cola isso na pagina)")
     warn("[bf_free] depois roda:")
     warn("    getgenv().__BF_KEY = \"<sua key>\"")
     warn("    loadstring(game:HttpGet(\"https://raw.githubusercontent.com/zekkz121/banana/main/bf_free.lua\"))()")
@@ -95,13 +101,13 @@ local function deny(id, reason)
             p:Kick(
                 "\n[Banana Cat Free]\n"..
                 "Sem key valida.\n\n"..
-                "LINK + HWID ja no CLIPBOARD\n"..
-                "(cola em qualquer lugar pra ver os 2)\n\n"..
-                "LINK:\n"..SHORT_URL.."\n\n"..
-                "HWID:\n"..id.."\n\n"..
-                "1) cola LINK no navegador -> passa linkvertise\n"..
-                "2) cola HWID na pagina -> pega a KEY\n"..
-                "3) volta aqui e roda com __BF_KEY = <key>"
+                "LINK copiado pro Ctrl+V:\n"..SHORT_URL.."\n\n"..
+                "SEU CODIGO (anota ou memoriza):\n\n"..
+                "       "..code.."\n\n"..
+                "1) cola o LINK no navegador\n"..
+                "2) completa o linkvertise\n"..
+                "3) cola o CODIGO na pagina -> pega a KEY\n"..
+                "4) volta e roda com __BF_KEY = <key>"
             )
         end)
     end
