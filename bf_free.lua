@@ -7,10 +7,22 @@ local KEY_PAGE     = "https://zekkz121.github.io/getkey/"
 local PAYLOAD_URL  = "https://raw.githubusercontent.com/zekkz121/banana/main/bf_main_paid.lua"
 local CACHE_FILE   = "bf_free_key.txt"
 local PAYLOAD_FILE = "bf_free_payload.lua"
+local LOG_FILE     = "bf_free_log.txt"
 local CACHE_TTL    = 24 * 60 * 60
+
+-- Chuoi locked no HWID do Potassium original. Hook gethwid pra enganar.
+local MASTER_HWID  = "4cb5a867820ed18a9d27c767afd08d337843891331918650970c9aa6967bdb594eba24cd4bb2b5846ef946ec44582545519766ac16f531f03ed917b68a3acc46"
 
 -- helpers --------------------------------------------------------------
 local g = (getgenv and getgenv()) or _G
+
+-- log em arquivo pra executores mobile sem console (Delta etc) ---------
+local LOG_BUF = {}
+local function log(msg)
+    LOG_BUF[#LOG_BUF+1] = ("[%s] %s"):format(os.date("!%H:%M:%S"), tostring(msg))
+    warn(msg)
+    if writefile then pcall(writefile, LOG_FILE, table.concat(LOG_BUF, "\n")) end
+end
 
 local function hwid()
     for _, f in ipairs({
@@ -152,6 +164,30 @@ g.KeyValid      = true
 g.Premium       = true
 g.Lifetime      = true
 g.__BANANA_SCRIPT_ROUTE = "bf_main"
+
+-- HWID spoof: Chuoi lockou a key paga no MASTER_HWID. Forca gethwid pra
+-- retornar sempre o mesmo em qualquer device (PC/mobile/outro executor).
+do
+    local hf = hookfunction or replaceclosure
+    local nmc = newcclosure or function(f) return f end
+    local spoofed = function() return MASTER_HWID end
+    for _, name in ipairs({"gethwid", "get_hwid"}) do
+        local tgt = g[name] or _G[name]
+        if type(tgt) == "function" and hf then
+            pcall(hf, tgt, nmc(spoofed))
+        end
+        g[name] = spoofed
+        _G[name] = spoofed
+    end
+    if syn and syn.get_hwid and hf then pcall(hf, syn.get_hwid, nmc(spoofed)) end
+    if Fluxus and Fluxus.get_hwid and hf then pcall(hf, Fluxus.get_hwid, nmc(spoofed)) end
+    -- RbxAnalyticsService:GetClientId tambem — alguns scripts usam isso
+    local ok, RAS = pcall(game.GetService, game, "RbxAnalyticsService")
+    if ok and RAS and hf then
+        pcall(hf, RAS.GetClientId, nmc(function(self) return MASTER_HWID end))
+    end
+    log("[bf_free] HWID spoof armado (MASTER_HWID="..MASTER_HWID:sub(1,16)..")")
+end
 
 -- payload: tenta cache local, senao baixa + salva
 local src
