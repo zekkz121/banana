@@ -1,6 +1,3 @@
--- bf_free.lua  —  built by olivia  —  https://discord.gg/ojailbreaks
--- loader free: hwid -> linkvertise -> key derivada -> bf_main_paid
-
 local SALT         = "zkz-ollie-fridge-6767-banana-cheia-$Lk9m!PxVn@2026"
 local SHORT_URL    = "https://link-hub.net/8789843/FRSCqUrAq5LC"
 local KEY_PAGE     = "https://zekkz121.github.io/getkey/"
@@ -73,15 +70,30 @@ local function setclip(txt)
     return false
 end
 
-local function ask(id)
+local function wipe_caches()
+    for _, f in ipairs({CACHE_FILE, PAYLOAD_FILE}) do
+        if isfile and isfile(f) and delfile then pcall(delfile, f) end
+    end
+end
+
+local function deny(id, reason)
+    wipe_caches()
     setclip(id)
-    warn("[bf_free] teu HWID foi copiado pro clipboard (Ctrl+V na pagina)")
+    warn("[bf_free] "..reason)
+    warn("[bf_free] teu HWID foi copiado pro clipboard")
     warn("[bf_free] 1) abra: "..SHORT_URL)
     warn("[bf_free] 2) complete o linkvertise")
     warn("[bf_free] 3) cola o HWID no campo e clica Gerar key")
-    warn("[bf_free] 4) roda: getgenv().__BF_KEY = \"<sua key>\" ; loadstring(readfile(\"bf_free.lua\"))()")
-    g.__BF_KEY_ASKED = true
-    error("[bf_free] precisa de key — veja instrucoes acima", 0)
+    warn("[bf_free] 4) roda no executor:")
+    warn("    getgenv().__BF_KEY = \"<sua key>\"")
+    warn("    loadstring(game:HttpGet(\"https://raw.githubusercontent.com/zekkz121/banana/main/bf_free.lua\"))()")
+    local p = game:GetService("Players").LocalPlayer
+    if p then
+        pcall(function()
+            p:Kick("\n[Banana Cat Free]\nSem key valida.\n\nPega sua key em:\n"..SHORT_URL.."\n\nSeu HWID foi copiado.\nCola na pagina e volta.")
+        end)
+    end
+    error("[bf_free] sem key — kick disparado", 0)
 end
 
 -- fluxo ----------------------------------------------------------------
@@ -91,11 +103,13 @@ local expected = derive_key(id, today())
 local cached = read_cache()
 if cached == expected then
     print("[bf_free] key cacheada OK ("..id:sub(1,8)..")")
-elseif g.__BF_KEY and g.__BF_KEY:lower() == expected then
+elseif g.__BF_KEY and tostring(g.__BF_KEY):lower() == expected then
     print("[bf_free] key aceita, cacheando 24h")
     write_cache(expected)
+elseif g.__BF_KEY then
+    deny(id, "key invalida pra esse HWID")
 else
-    ask(id)
+    deny(id, "nenhuma key fornecida")
 end
 
 -- load payload ---------------------------------------------------------
