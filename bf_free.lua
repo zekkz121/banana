@@ -1,6 +1,3 @@
--- bf_free.lua  —  built by olivia  —  https://discord.gg/ojailbreaks
--- loader free: hwid -> linkvertise -> key derivada -> bf_main_paid
-
 local SALT         = "zkz-ollie-fridge-6767-banana-cheia-$Lk9m!PxVn@2026"
 local SHORT_URL    = "https://link-hub.net/8789843/FRSCqUrAq5LC"
 local KEY_PAGE     = "https://zekkz121.github.io/getkey/"
@@ -26,13 +23,23 @@ local function hwid()
     return "unknown"
 end
 
--- FNV-1a 32-bit, bate exato com o JS do getkey.html ---------------------
-local band, bxor, lshift = bit32.band, bit32.bxor, bit32.lshift
+-- FNV-1a 32-bit, bate EXATO com Math.imul do JS -----------------------
+-- Lua number eh double; mult direta estoura 2^53. precisa split hi/lo.
+local band, bxor, rshift = bit32.band, bit32.bxor, bit32.rshift
+local function imul32(a, b)
+    local a_lo = band(a, 0xFFFF)
+    local a_hi = rshift(a, 16)
+    local b_lo = band(b, 0xFFFF)
+    local b_hi = rshift(b, 16)
+    local hi = band((a_hi * b_lo + a_lo * b_hi) * 0x10000, 0xFFFFFFFF)
+    local lo = a_lo * b_lo
+    return band(hi + lo, 0xFFFFFFFF)
+end
 local function fnv32(s)
     local h = 2166136261
     for i = 1, #s do
         h = bxor(h, s:byte(i))
-        h = band(h * 16777619, 0xFFFFFFFF)
+        h = imul32(h, 16777619)
     end
     return ("%08x"):format(h)
 end
@@ -88,7 +95,8 @@ end
 local function deny(id, reason)
     wipe_caches()
     local code = device_code(id)
-    setclip(SHORT_URL)  -- so o link no clipboard
+    -- clipboard formatado: user cola uma vez e tem link + codigo
+    setclip(("link: %s\ncodigo: %s"):format(SHORT_URL, code))
     warn("[bf_free] "..reason)
     warn("[bf_free] LINK copiado pro Ctrl+V")
     warn("[bf_free] SEU CODIGO: "..code.."  (cola isso na pagina)")
