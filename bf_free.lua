@@ -1,5 +1,8 @@
+-- bf_free.lua  —  built by olivia  —  https://discord.gg/ojailbreaks
+-- loader free: hwid -> linkvertise -> key derivada -> bf_main_paid
+
 local SALT         = "zkz-ollie-fridge-6767-banana-cheia-$Lk9m!PxVn@2026"
-local SHORT_URL    = "https://link-hub.net/8789843/FRSCqUrAq5LC"
+local SHORT_URL    = "https://link-center.net/8789843/5Qr7GRDMDjE7"
 local KEY_PAGE     = "https://zekkz121.github.io/getkey/"
 local PAYLOAD_URL  = "https://raw.githubusercontent.com/zekkz121/banana/main/bf_main_paid.lua"
 local CACHE_FILE   = "bf_free_key.txt"
