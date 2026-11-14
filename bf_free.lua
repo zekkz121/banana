@@ -78,19 +78,26 @@ end
 
 local function deny(id, reason)
     wipe_caches()
-    setclip(id)
+    setclip(SHORT_URL)  -- linkvertise ja no Ctrl+V
     warn("[bf_free] "..reason)
-    warn("[bf_free] teu HWID foi copiado pro clipboard")
-    warn("[bf_free] 1) abra: "..SHORT_URL)
-    warn("[bf_free] 2) complete o linkvertise")
-    warn("[bf_free] 3) cola o HWID no campo e clica Gerar key")
-    warn("[bf_free] 4) roda no executor:")
+    warn("[bf_free] LINKVERTISE copiado pro clipboard — cola no navegador")
+    warn("[bf_free] teu HWID (copia a mao pra colar na pagina): "..id)
+    warn("[bf_free] depois roda:")
     warn("    getgenv().__BF_KEY = \"<sua key>\"")
     warn("    loadstring(game:HttpGet(\"https://raw.githubusercontent.com/zekkz121/banana/main/bf_free.lua\"))()")
     local p = game:GetService("Players").LocalPlayer
     if p then
         pcall(function()
-            p:Kick("\n[Banana Cat Free]\nSem key valida.\n\nPega sua key em:\n"..SHORT_URL.."\n\nSeu HWID foi copiado.\nCola na pagina e volta.")
+            p:Kick(
+                "\n[Banana Cat Free]\n"..
+                "Sem key valida.\n\n"..
+                "LINKVERTISE copiado pro Ctrl+V:\n"..SHORT_URL.."\n\n"..
+                "Seu HWID (anota ou copia a mao):\n"..id.."\n\n"..
+                "1) cola o link no navegador\n"..
+                "2) completa o linkvertise\n"..
+                "3) cola o HWID na pagina, pega a key\n"..
+                "4) volta e roda de novo com __BF_KEY"
+            )
         end)
     end
     error("[bf_free] sem key — kick disparado", 0)
